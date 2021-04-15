@@ -17,7 +17,7 @@ OPTIONS_MSG = """
 
 # SQL query to create the todolist table if it doesn't exist yet.
 CREATE_TABLE = """
-CREATE TABLE IF NOT EXIST todolist (
+CREATE TABLE IF NOT EXISTS todolist (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(40) NOT NULL,
     description VARCHAR(256),
@@ -62,19 +62,28 @@ def execute_read_query(connection, query):
     result = None
     try:
         cursor.execute(query)
-        result = connection.fetchall()
+        result = cursor.fetchall()
         return result
     except Error as e:
         print(f"The error '{e}' occurred")
 
-def view():
-    execute_read_query(c, VIEW_TODO_LIST)
+def column_names(connection):
+    cursor = connection.cursor()
+    cursor.execute(VIEW_TODO_LIST)
+    cursor.fetchall()
+    column_names = [description[0] for description in cursor.description]
+    return tuple(column_names)
 
-def add():
+def view(connection):
+    print (column_names(connection))
+    for task in execute_read_query(connection, VIEW_TODO_LIST):
+        print(task)
+
+def add(connection):
 
     name = input("Name of the task: ")
     description = input("Description of the task: ")
-    priority = input("Priority: (H)igh/(M)edium/(L)ow")
+    priority = input("Priority (High/Medium/Low): ")
     category = input("Category: ")
     due = input("Due date (YYYY-MM-DD): ")
     location = input("Location: ")
@@ -85,25 +94,26 @@ def add():
         todolist (name, description, priority, category, due, location,
                   status)
     VALUES
-        ({name}, {description}, {priority}, {category}, {due},
-         {location}, {status});
+        ('{name}', '{description}', '{priority}', '{category}', '{due}',
+         '{location}', '{status}');
     """
-    execute_query(c, _ADD_TASK)
+
+    execute_query(connection, _ADD_TASK)
 
 def search(search_term):
     pass
 
 
-def delete(delete_task_id):
-    _delete_task = f"DELETE FROM todolist WHERE id = {delete_task_id}"
-    execute_query(c, _delete_task)
+def delete(connection, delete_task_id):
+    _delete_task = f"DELETE FROM todolist WHERE id = '{delete_task_id}'"
+    execute_query(connection, _delete_task)
 
-def edit(edit_task_id):
+def edit(connection, edit_task_id):
     edit_fields = input("""
     Which field(s) would you like to edit?
     For multiple fields edits, separate the field names with commas.
     """)
-    edit_fields.replace(' ', '')
+    edit_fields = edit_fields.replace(' ', '')
     edit_fields_list = edit_fields.split(',')
     edit_fields_values = []
     for field in edit_fields_list:
@@ -116,37 +126,42 @@ def edit(edit_task_id):
         UPDATE
             todolist
         SET
-            {field} = {value}
+            '{field}' = '{value}'
         WHERE
-            id = edit_task_id
+            id = '{edit_task_id}'
         """
-        execute_query(c, _update_task)
+        execute_query(connection, _update_task)
 
 def main():
     """
     Main loop of the program.
     """
     print(WELCOME_MSG)
-    c = create_connection(get_home_folder())
+    c = create_connection(get_home_folder() + '/test.sqlite')
     execute_query(c, CREATE_TABLE)
     while c != None:
         menu_input = str(input(OPTIONS_MSG))
-        if menu_input.upper() = 'V':
-            view()
-        elif menu_input.upper() = 'A':
-            add()
-        elif menu_input.upper() = 'S':
+        if menu_input.upper() == 'V':
+            view(c)
+        elif menu_input.upper() == 'A':
+            add(c)
+        elif menu_input.upper() == 'S':
             search_term = str(input("Input the search term: "))
             search(search_term)
-        elif menu_input.upper() = 'D':
-            view()
+        elif menu_input.upper() == 'D':
+            view(c)
             delete_task_id = int(input("Input task ID to delete: "))
-            delete(delete_task_id)
-        elif menu_input.upper() = 'E':
-            view()
-            edit_task_id = int(input("Input task ID to edit: "))
-            edit(edit_task_id)
-        elif menu_input.upper() = 'X':
-            c = None
+            delete(c, delete_task_id)
+        elif menu_input.upper() == 'E':
+            view(c)
+            edit_task_id = str(input("Input task ID to edit: "))
+            edit(c, edit_task_id)
+        elif menu_input.upper() == 'X':
+            sys.exit()
+        # elif menu_input == 'test':
+        #     print(column_names(c))
     sys.exit()
+
+if __name__ == '__main__':
+    main()
 
