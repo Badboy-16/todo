@@ -11,8 +11,7 @@ Please select the options below.
 """
 
 OPTIONS_MSG = """
-(V)iew all tasks. (A)dd tasks. (S)earch tasks. (D)elete tasks.
-(E)dit tasks. E(x)it.
+(V)iew all tasks. (A)dd tasks. (D)elete tasks. (E)dit tasks. E(x)it.
 """
 
 # SQL query to create the todolist table if it doesn't exist yet.
@@ -100,10 +99,6 @@ def add(connection):
 
     execute_query(connection, _ADD_TASK)
 
-def search(search_term):
-    pass
-
-
 def delete(connection, delete_task_id):
     _delete_task = f"DELETE FROM todolist WHERE id = '{delete_task_id}'"
     execute_query(connection, _delete_task)
@@ -145,9 +140,6 @@ def main():
             view(c)
         elif menu_input.upper() == 'A':
             add(c)
-        elif menu_input.upper() == 'S':
-            search_term = str(input("Input the search term: "))
-            search(search_term)
         elif menu_input.upper() == 'D':
             view(c)
             delete_task_id = int(input("Input task ID to delete: "))
@@ -158,8 +150,6 @@ def main():
             edit(c, edit_task_id)
         elif menu_input.upper() == 'X':
             sys.exit()
-        # elif menu_input == 'test':
-        #     print(column_names(c))
     sys.exit()
 
 if __name__ == '__main__':
