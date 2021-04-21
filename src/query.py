@@ -53,3 +53,11 @@ def column_names(connection):
     column_names = [description[0] for description in cursor.description]
     return tuple(column_names)
 
+def valid_id(connection, id):
+    cursor = connection.cursor()
+    id_list = [id[0] for id in cursor.execute("SELECT id FROM todolist")]
+    if int(id) in id_list:
+        return True
+    else:
+        return False
+

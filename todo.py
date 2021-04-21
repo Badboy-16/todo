@@ -6,6 +6,7 @@ from src.query import (
     execute_query,
     create_connection,
     CREATE_TABLE,
+    valid_id
 )
 from src.option import view, add, delete, edit
 
@@ -41,13 +42,21 @@ def main():
         elif menu_input.upper() == 'D':
             view(c)
             delete_task_id = int(input("Input task ID to delete: "))
-            delete(c, delete_task_id)
+            if valid_id(c, delete_task_id) == True:
+                delete(c, delete_task_id)
+            else:
+                print("Invalid ID.")
         elif menu_input.upper() == 'E':
             view(c)
             edit_task_id = str(input("Input task ID to edit: "))
-            edit(c, edit_task_id)
+            if valid_id(c, edit_task_id) == True:
+                edit(c, edit_task_id)
+            else:
+                print("Invalid ID.")
         elif menu_input.upper() == 'X':
             sys.exit()
+        else:
+            print("Invalid input.")
     sys.exit()
 
 if __name__ == '__main__':

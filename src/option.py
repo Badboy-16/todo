@@ -4,6 +4,14 @@ from .query import(
     column_names,
     VIEW_TODO_LIST
 )
+import datetime
+
+def validate_date(d):
+    try:
+        datetime.datetime.strptime(d, '%Y-%m-%d')
+        return True
+    except:
+        return False
 
 def view(connection):
     print (column_names(connection))
@@ -12,11 +20,29 @@ def view(connection):
 
 def add(connection):
 
+    valid_priority = False
+    valid_due = False
+
     name = input("Name of the task: ")
     description = input("Description of the task: ")
-    priority = input("Priority (High/Medium/Low): ")
+
+    while valid_priority == False:
+        priority = str(input("Priority (High/Medium/Low): "))
+        if priority.title() in ['High', 'Medium', 'Low']:
+            valid_priority = True
+            priority = priority.title()
+        else:
+            print("Invalid priority.")
+
     category = input("Category: ")
-    due = input("Due date (YYYY-MM-DD): ")
+
+    while valid_due == False:
+        due = str(input("Due date (YYYY-MM-DD): "))
+        if validate_date(due) == True:
+            valid_due = True
+        else:
+            print("Invalid due date.")
+
     location = input("Location: ")
     status = 'in progress'
 
@@ -42,9 +68,27 @@ def edit(connection, edit_task_id):
     """)
     edit_fields = edit_fields.replace(' ', '')
     edit_fields_list = edit_fields.split(',')
+    for field in edit_fields_list:
+        if field not in column_names(connection):
+            print("Invalid field name.")
+            return
+        else:
+            continue
     edit_fields_values = []
     for field in edit_fields_list:
         value = input(f"Please input the updated {field}: ")
+        if field == 'priority':
+            if value.title() in ['High', 'Medium', 'Low']:
+                value = value.title()
+            else:
+                print("Invalid priority value.")
+                return
+        elif field == 'due':
+            if validate_date(value) == True:
+                pass
+            else:
+                print("Invalid due date value.")
+                return
         edit_fields_values.append(value)
     edit_fields_pairs = list(zip(edit_fields_list, edit_fields_values))
 
