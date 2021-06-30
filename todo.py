@@ -1,6 +1,5 @@
 from os import environ
 from os import name as os_name
-import sys
 
 from src.query import (
     execute_query,
@@ -21,11 +20,10 @@ OPTIONS_MSG = """
 
 def get_home_folder():
     if os_name == 'nt':
-        home_folder_path = str(environ['USERPROFILE'])
+        return str(environ['USERPROFILE'])
     else:
-        home_folder_path = str(environ['HOME'])
-    return home_folder_path
-
+        return str(environ['HOME'])
+    
 def main():
     """
     Main loop of the program.
@@ -42,22 +40,28 @@ def main():
         elif menu_input.upper() == 'D':
             view(c)
             delete_task_id = int(input("Input task ID to delete: "))
-            if valid_id(c, delete_task_id) == True:
-                delete(c, delete_task_id)
+            try:
+                if valid_id(c, delete_task_id):
+                    delete(c, delete_task_id)
+            except ValueError:
+                print("Please input an integer ID value")
             else:
                 print("Invalid ID.")
         elif menu_input.upper() == 'E':
             view(c)
             edit_task_id = str(input("Input task ID to edit: "))
-            if valid_id(c, edit_task_id) == True:
-                edit(c, edit_task_id)
+            try:
+                if valid_id(c, edit_task_id):
+                    edit(c, edit_task_id)
+            except ValueError:
+                print("Please input an integer ID value")
             else:
                 print("Invalid ID.")
         elif menu_input.upper() == 'X':
-            sys.exit()
+            exit()
         else:
             print("Invalid input.")
-    sys.exit()
+    exit()
 
 if __name__ == '__main__':
     main()
